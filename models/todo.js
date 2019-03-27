@@ -12,8 +12,7 @@ function validateTodo(todo) {
     title: Joi.string()
       .min(2)
       .max(255)
-      .required(),
-    user_id: Joi.required()
+      .required()
   };
 
   return Joi.validate(todo, schema);
