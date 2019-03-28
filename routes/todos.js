@@ -15,15 +15,18 @@ router.get("/", async (req, res) => {
 /* ***************
 // post a new todo
 *************** */
-router.post("/", auth, async (req, res) => {
+router.post("/", async (req, res) => {
   // validate the todo by Joi
   const { error } = validateTodo(req.body);
   if (error) res.status(400).send("Invalid todo item.");
 
   // get the user_id from the jwt that is added to the req in the auth module
-  const user_id = req.user._id;
+  // const user_id = req.user._id;
 
-  const todo = new Todo({ title: req.body.title, user_id: user_id });
+  // const todo = new Todo({ title: req.body.title, user_id: user_id });
+
+  // *********** Without login
+  const todo = new Todo({ title: req.body.title });
 
   await todo.save();
 
@@ -34,7 +37,7 @@ router.post("/", auth, async (req, res) => {
 // delete a todo
 ************* */
 router.delete("/:id", async (req, res) => {
-  const result = await Todo.findByIdAndDelete(req.params.id);
+  const result = await Todo.findOneAndDelete({ _id: req.params.id });
   res.send(result);
 });
 
@@ -42,8 +45,8 @@ router.delete("/:id", async (req, res) => {
 // update a todo
 ************* */
 router.put("/:id", async (req, res) => {
-  const todo = await Todo.findByIdAndUpdate(
-    req.params.id,
+  const todo = await Todo.findOneAndUpdate(
+    { _id: req.params.id },
     {
       $set: { title: req.body.title }
     },
