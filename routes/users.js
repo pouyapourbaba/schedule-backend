@@ -45,6 +45,7 @@ router.post("/", async (req, res) => {
   // the jwt in the header of the response
   res
     .header("x-auth-token", token)
+    .header("access-control-expose-headers", "x-auth-token")
     .send(_.pick(user, ["_id", "first_name", "last_name", "email"]));
 });
 

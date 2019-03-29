@@ -38,7 +38,7 @@ router.post("/", async (req, res) => {
 ************* */
 router.delete("/:id", async (req, res) => {
   const result = await Todo.findOneAndDelete({ _id: req.params.id });
-  res.send(result);
+  console.log(result);
 });
 
 /* *************
