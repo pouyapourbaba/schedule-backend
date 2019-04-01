@@ -9,6 +9,7 @@ const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 
+// post a new user
 router.post("/", async (req, res) => {
   // validate the user by Joi
   const { error } = validateUser(req.body);
@@ -33,7 +34,7 @@ router.post("/", async (req, res) => {
   user.password = await bcrypt.hash(user.password, salt);
 
   // save the user in DB
-  await user.save();
+  user = await user.save();
 
   // email verification? no direct login after registration
   // ... Code
@@ -46,7 +47,20 @@ router.post("/", async (req, res) => {
   res
     .header("x-auth-token", token)
     .header("access-control-expose-headers", "x-auth-token")
-    .send(_.pick(user, ["_id", "first_name", "last_name", "email"]));
+    .send(_.pick(user, ["_id", "first_name", "last_name", "email", "added_date"]));
 });
+/* *********************
+// update the first name
+** ********************/
+router.put("/:id", async (req, res) => {
+  const user = await User.findOneAndUpdate(
+    { _id: req.params.id },
+    {
+      $set: { first_name: req.body.first_name }
+    },
+    { new: true }
+  );
+  res.send(user);
+})
 
 module.exports = router;
