@@ -10,7 +10,17 @@ const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 
+/* ************************
+// GET THE USER INFORMATION
+** ***********************/
+router.get("/:id", async (req,res) => {
+  const user = await User.findOne({_id: req.params.id});
+  res.send(user);
+})
+
+/* ***************
 // post a new user
+** **************/
 router.post("/", async (req, res) => {
   // validate the user by Joi
   const { error } = validateUser(req.body, joiSchema);
@@ -57,7 +67,9 @@ router.post("/", async (req, res) => {
 ** **************************************************/
 router.put("/:id", async (req, res) => {
   // validate the user property by Joi
+  console.log(req.body)
   const property = Object.keys(req.body)[0];
+ console.log("property ", property);
   const schema = { [property]: joiSchema[property] };
   const { error } = validateUser(req.body, schema);
   if (error) return res.status(400).send(error.details[0].message);
