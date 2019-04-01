@@ -28,31 +28,40 @@ const userSchema = new mongoose.Schema({
 userSchema.methods.generateAuthToken = function() {
   return jwt.sign({ _id: this._id, first_name: this.first_name, last_name: this.last_name, added_date: this.added_date, email: this.email }, config.get("jwtPrivateKey"));
 }
+/* ************** 
+// schema for Joi
+************** */
+const schema = {
+  first_name: Joi.string()
+    .min(4)
+    .max(255)
+    .required(),
+  last_name: Joi.string()
+    .min(4)
+    .max(255)
+    .required(),
+  email: Joi.string()
+    .min(6)
+    .max(255)
+    .required()
+    .email(),
+  password: Joi.string()
+    .min(6)
+    .max(255)
+    .required(),
+  added_date: Joi.date(),
+};
 
+/* ************** ******
 // user validator by Joi
-function validateUser(user) {
-  const schema = {
-    first_name: Joi.string()
-      .min(4)
-      .max(255)
-      .required(),
-    last_name: Joi.string()
-      .min(4)
-      .max(255)
-      .required(),
-    email: Joi.string()
-      .min(6)
-      .max(255)
-      .required()
-      .email(),
-    password: Joi.string()
-      .min(6)
-      .max(255)
-      .required(),
-    added_date: Joi.date(),
-  };
-
+* *********************/
+function validateUser(user, schema) {
   return Joi.validate(user, schema);
+}
+
+// validate only one property
+function validateOneProperty(user) {
+
 }
 
 // Password complexity
@@ -84,5 +93,6 @@ function validatePasswordComplexity(pass) {
 const User = mongoose.model("User", userSchema);
 
 exports.User = User;
+exports.joiSchema = schema;
 exports.validateUser = validateUser;
 exports.validatePasswordComplexity = validatePasswordComplexity;

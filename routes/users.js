@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const _ = require("lodash");
 const {
   User,
+  joiSchema,
   validateUser,
   validatePasswordComplexity
 } = require("../models/user");
@@ -12,7 +13,7 @@ const router = express.Router();
 // post a new user
 router.post("/", async (req, res) => {
   // validate the user by Joi
-  const { error } = validateUser(req.body);
+  const { error } = validateUser(req.body, joiSchema);
   if (error) return res.status(400).send(error.details[0].message);
 
   // check the passwrod complexity
@@ -47,20 +48,28 @@ router.post("/", async (req, res) => {
   res
     .header("x-auth-token", token)
     .header("access-control-expose-headers", "x-auth-token")
-    .send(_.pick(user, ["_id", "first_name", "last_name", "email", "added_date"]));
+    .send(
+      _.pick(user, ["_id", "first_name", "last_name", "email", "added_date"])
+    );
 });
-/* *********************
-// update the first name
-** ********************/
+/* ***************************************************
+// update the properties of a user except the password
+** **************************************************/
 router.put("/:id", async (req, res) => {
+  // validate the user property by Joi
+  const property = Object.keys(req.body)[0];
+  const schema = { [property]: joiSchema[property] };
+  const { error } = validateUser(req.body, schema);
+  if (error) return res.status(400).send(error.details[0].message);
+
   const user = await User.findOneAndUpdate(
     { _id: req.params.id },
     {
-      $set: { first_name: req.body.first_name }
+      $set: { [property]: req.body[property] }
     },
     { new: true }
   );
   res.send(user);
-})
+});
 
 module.exports = router;
