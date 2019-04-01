@@ -21,7 +21,8 @@ router.post("/", async (req, res) => {
 
   // create a jwt when the user logs in and set it in the response header
   const token = user.generateAuthToken();
-  res.header("x-auth-token", token).send("Logged in successfully");
+  // res.header("x-auth-token", token).send("Logged in successfully");
+  res.send(token);
 });
 
 // validation function

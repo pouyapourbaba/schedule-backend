@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.methods.generateAuthToken = function() {
-  return jwt.sign({ _id: this._id }, config.get("jwtPrivateKey"));
+  return jwt.sign({ _id: this._id, first_name: this.first_name, last_name: this.last_name, added_date: this.added_date, email: this.email }, config.get("jwtPrivateKey"));
 }
 
 // user validator by Joi

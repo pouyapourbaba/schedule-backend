@@ -11,7 +11,7 @@ function validateTodo(todo) {
   const schema = {
     title: Joi.string()
       .min(2)
-      .max(255)
+      .max(512)
       .required()
   };
 
