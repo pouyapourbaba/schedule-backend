@@ -7,9 +7,14 @@ const router = express.Router();
 /* *****************
 // get all the todos
 ***************** */
-router.get("/", async (req, res) => {
-  const todos = await Todo.find();
-  res.send(todos);
+router.get("/:id", async (req, res) => {
+  try {
+    const todos = await Todo.find({user_id: req.params.id}).populate("user_id").select("title");
+    res.send(todos);
+    
+  } catch (ex) {
+    res.status(400).send(ex.message);
+  }
 });
 
 /* ***************
@@ -26,7 +31,7 @@ router.post("/", async (req, res) => {
   // const todo = new Todo({ title: req.body.title, user_id: user_id });
 
   // *********** Without login
-  const todo = new Todo({ title: req.body.title });
+  const todo = new Todo({ title: req.body.title, user_id: req.body.user_id });
 
   await todo.save();
 
@@ -38,7 +43,7 @@ router.post("/", async (req, res) => {
 ************* */
 router.delete("/:id", async (req, res) => {
   const result = await Todo.findOneAndDelete({ _id: req.params.id });
-  console.log(result);
+  res.send(result)
 });
 
 /* *************
