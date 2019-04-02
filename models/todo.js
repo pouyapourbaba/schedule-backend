@@ -4,7 +4,11 @@ const mongoose = require("mongoose");
 // Define the todo schema
 const todoSchema = new mongoose.Schema({
   title: { type: String, required: true, minlength: 2, maxlength: 255 },
-  user_id: { type: mongoose.Schema.Types.ObjectId, ref: "Users" }
+  user_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  }
 });
 
 function validateTodo(todo) {
@@ -12,7 +16,8 @@ function validateTodo(todo) {
     title: Joi.string()
       .min(2)
       .max(512)
-      .required()
+      .required(),
+    user_id: Joi.required()
   };
 
   return Joi.validate(todo, schema);

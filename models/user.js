@@ -59,10 +59,10 @@ function validateUser(user, schema) {
   return Joi.validate(user, schema);
 }
 
-// validate only one property
-function validateOneProperty(user) {
+// // validate only one property
+// function validateOneProperty(user) {
 
-}
+// }
 
 // Password complexity
 function validatePasswordComplexity(pass) {

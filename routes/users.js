@@ -14,8 +14,13 @@ const router = express.Router();
 // GET THE USER INFORMATION
 ** ***********************/
 router.get("/:id", async (req,res) => {
-  const user = await User.findOne({_id: req.params.id});
-  res.send(user);
+  try {
+    const user = await User.findOne({_id: req.params.id});
+    res.send(user);
+    
+  } catch (ex) {
+    res.status(400).send(ex.message)
+  }
 })
 
 /* ***************
@@ -62,14 +67,13 @@ router.post("/", async (req, res) => {
       _.pick(user, ["_id", "first_name", "last_name", "email", "added_date"])
     );
 });
+
 /* ***************************************************
 // update the properties of a user except the password
 ** **************************************************/
 router.put("/:id", async (req, res) => {
   // validate the user property by Joi
-  console.log(req.body)
   const property = Object.keys(req.body)[0];
- console.log("property ", property);
   const schema = { [property]: joiSchema[property] };
   const { error } = validateUser(req.body, schema);
   if (error) return res.status(400).send(error.details[0].message);
