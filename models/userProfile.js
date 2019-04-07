@@ -1,4 +1,5 @@
 const Joi = require("joi");
+Joi.objectId = require('joi-objectid')(Joi);
 const mongoose = require("mongoose");
 
 const userProfileSchema = new mongoose.Schema({
@@ -23,10 +24,7 @@ const userProfileSchema = new mongoose.Schema({
 
 function validateUserProfile(userProfile) {
   const schema = {
-    user_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
-    },
+    user_id: Joi.objectId(),
     first_name: Joi.string()
       .min(6)
       .max(255)
