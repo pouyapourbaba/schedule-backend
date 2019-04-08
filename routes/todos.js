@@ -18,6 +18,20 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+/* ****************************************
+// get todos based on the user and the week
+**************************************** */
+router.get("/:user_id/:week", async (req, res) => {
+  try {
+    const todos = await Todo.find({ user_id: req.params.user_id, weekInYear: req.params.week })
+      .populate("user_id")
+      .select("title");
+    res.send(todos);
+  } catch (ex) {
+    res.status(400).send(ex.message);
+  }
+});
+
 /* ***************
 // post a new todo
 *************** */
