@@ -25,7 +25,7 @@ router.get("/:user_id/:week", async (req, res) => {
   try {
     const todos = await Todo.find({ user_id: req.params.user_id, weekInYear: req.params.week })
       .populate("user_id")
-      .select("title");
+      .select(["title", "isDone"]);
     res.send(todos);
   } catch (ex) {
     res.status(400).send(ex.message);
@@ -38,10 +38,10 @@ router.get("/:user_id/:week", async (req, res) => {
 router.post("/:user_id", async (req, res) => {
   // validate the todo by Joi
   const { error } = validateTodo(req.body);
-  if (error) res.status(400).send("Invalid todo item.");
+  if (error) return res.status(400).send("Invalid todo item.");
 
   const user_id = req.params.user_id;
-  const todoObj = _.pick(req.body, ["title", "year", "month", "weekInYear"]);
+  const todoObj = _.pick(req.body, ["title", "year", "month", "weekInYear", "isDone"]);
   const todo = new Todo({ ...todoObj, user_id });
   console.log("{...todoObj, user_id} ", { ...todoObj, user_id });
 
@@ -66,6 +66,20 @@ router.put("/:id", async (req, res) => {
     { _id: req.params.id },
     {
       $set: { title: req.body.title }
+    },
+    { new: true }
+  );
+  res.send(todo);
+});
+
+/* ***************************
+// update the status of a todo 
+*************************** */
+router.put("/status/:id", async (req, res) => {
+  const todo = await Todo.findOneAndUpdate(
+    { _id: req.params.id },
+    {
+      $set: { isDone: !req.body.isDone }
     },
     { new: true }
   );
