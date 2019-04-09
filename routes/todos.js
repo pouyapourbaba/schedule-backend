@@ -9,9 +9,24 @@ const router = express.Router();
 ***************** */
 router.get("/:id", async (req, res) => {
   try {
-    const todos = await Todo.find({user_id: req.params.id}).populate("user_id").select("title");
+    const todos = await Todo.find({ user_id: req.params.id })
+      .populate("user_id")
+      .select("title");
     res.send(todos);
-    
+  } catch (ex) {
+    res.status(400).send(ex.message);
+  }
+});
+
+/* ****************************************
+// get todos based on the user and the week
+**************************************** */
+router.get("/:user_id/:week", async (req, res) => {
+  try {
+    const todos = await Todo.find({ user_id: req.params.user_id, weekInYear: req.params.week })
+      .populate("user_id")
+      .select(["title", "isDone"]);
+    res.send(todos);
   } catch (ex) {
     res.status(400).send(ex.message);
   }
@@ -20,18 +35,15 @@ router.get("/:id", async (req, res) => {
 /* ***************
 // post a new todo
 *************** */
-router.post("/", async (req, res) => {
+router.post("/:user_id", async (req, res) => {
   // validate the todo by Joi
   const { error } = validateTodo(req.body);
-  if (error) res.status(400).send("Invalid todo item.");
+  if (error) return res.status(400).send("Invalid todo item.");
 
-  // get the user_id from the jwt that is added to the req in the auth module
-  // const user_id = req.user._id;
-
-  // const todo = new Todo({ title: req.body.title, user_id: user_id });
-
-  // *********** Without login
-  const todo = new Todo({ title: req.body.title, user_id: req.body.user_id });
+  const user_id = req.params.user_id;
+  const todoObj = _.pick(req.body, ["title", "year", "month", "weekInYear", "isDone"]);
+  const todo = new Todo({ ...todoObj, user_id });
+  console.log("{...todoObj, user_id} ", { ...todoObj, user_id });
 
   await todo.save();
 
@@ -43,7 +55,7 @@ router.post("/", async (req, res) => {
 ************* */
 router.delete("/:id", async (req, res) => {
   const result = await Todo.findOneAndDelete({ _id: req.params.id });
-  res.send(result)
+  res.send(result);
 });
 
 /* *************
@@ -54,6 +66,20 @@ router.put("/:id", async (req, res) => {
     { _id: req.params.id },
     {
       $set: { title: req.body.title }
+    },
+    { new: true }
+  );
+  res.send(todo);
+});
+
+/* ***************************
+// update the status of a todo 
+*************************** */
+router.put("/status/:id", async (req, res) => {
+  const todo = await Todo.findOneAndUpdate(
+    { _id: req.params.id },
+    {
+      $set: { isDone: !req.body.isDone }
     },
     { new: true }
   );

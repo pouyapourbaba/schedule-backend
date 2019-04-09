@@ -8,7 +8,11 @@ const todoSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true
-  }
+  },
+  year: {type: Number, required: true},
+  month: {type: Number, required: true},
+  weekInYear: {type: Number, required: true},
+  isDone: Boolean
 });
 
 function validateTodo(todo) {
@@ -17,7 +21,11 @@ function validateTodo(todo) {
       .min(2)
       .max(512)
       .required(),
-    user_id: Joi.required()
+    // user_id: Joi.required(),
+    year: Joi.number().required(),
+    month: Joi.number().required(),
+    weekInYear: Joi.number().required(),
+    isDone: Joi.boolean(),
   };
 
   return Joi.validate(todo, schema);
