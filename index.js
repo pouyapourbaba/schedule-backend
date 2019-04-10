@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const users = require("./routes/users");
 const login = require("./routes/login");
 const todos = require("./routes/todos");
+const tasks = require("./routes/tasks");
 const app = express();
 
 // check the jwtPrivateKey in the environment variables
@@ -32,6 +33,7 @@ app.use(morgan("dev"))
 app.use("/api/users", users);
 app.use("/api/login", login);
 app.use("/api/todos", todos);
+app.use("/api/tasks", tasks);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}...`));
