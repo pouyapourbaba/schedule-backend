@@ -16,8 +16,7 @@ router.post("/new/:user_id", async (req, res) => {
     "days"
   ]);
   const task = new Task({ ...taskObj, user_id });
-  console.log("task ", task);
-  const result = await task.save({ ...req.body, user_id: req.params.user_id });
+  await task.save({ ...req.body, user_id: req.params.user_id });
   res.send(task);
 });
 

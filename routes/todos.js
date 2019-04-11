@@ -50,7 +50,6 @@ router.post("/new/:user_id", async (req, res) => {
     "isDone"
   ]);
   const todo = new Todo({ ...todoObj, user_id });
-  console.log("{...todoObj, user_id} ", { ...todoObj, user_id });
 
   await todo.save();
 
