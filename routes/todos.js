@@ -8,19 +8,14 @@ const router = express.Router();
  * get the list of all todos for a user by the user_id
  */
 router.get("/:user_id", async (req, res) => {
-  try {
     const todos = await Todo.find({ user_id: req.params.user_id });
     res.send(todos);
-  } catch (ex) {
-    res.status(400).send(ex.message);
-  }
 });
 
 /*
  * get todos based on the user and the week
  */
 router.get("/:user_id/:week_number", async (req, res) => {
-  try {
     const todos = await Todo.find({
       user_id: req.params.user_id,
       weekInYear: req.params.week_number
@@ -28,9 +23,6 @@ router.get("/:user_id/:week_number", async (req, res) => {
       // .populate("user_id")
       .select(["title", "isDone"]);
     res.send(todos);
-  } catch (ex) {
-    res.status(400).send(ex.message);
-  }
 });
 
 /*

@@ -24,7 +24,6 @@ router.post("/new/:user_id", async (req, res) => {
  * get tasks based on the user and the week
  */
 router.get("/:user_id/:week_number", async (req, res) => {
-  try {
     const tasks = await Task.find({
       user_id: req.params.user_id,
       weekInYear: req.params.week_number
@@ -32,25 +31,18 @@ router.get("/:user_id/:week_number", async (req, res) => {
       // .populate("user_id")
       .select(["title", "days", "user_id"]);
     res.send(tasks);
-  } catch (ex) {
-    res.status(400).send(ex.message);
-  }
 });
 
 /*
  * get tasks based on the user
  */
 router.get("/:user_id", async (req, res) => {
-  try {
     const tasks = await Task.find({
       user_id: req.params.user_id
     })
       // .populate("user_id")
       .select(["title", "days", "weekInYear", "month", "user_id"]);
     res.send(tasks);
-  } catch (ex) {
-    res.status(400).send(ex.message);
-  }
 });
 
 /* 
