@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 const logger = require("./logging")
 
 module.exports = function() {
-  logger.infoLogger(config("db"))
+  logger.infoLogger(config.get("db"))
   mongoose
-    .connect(config("db"), {
+    .connect(config.get("db"), {
       useCreateIndex: true,
       useNewUrlParser: true
     })
