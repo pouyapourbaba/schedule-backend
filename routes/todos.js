@@ -60,10 +60,9 @@ router.post("/new/:user_id", async (req, res) => {
 /*
  * delete a todo
  */
-router.delete("/delete/:todo_id/:user_id", async (req, res) => {
+router.delete("/delete/:todo_id/", async (req, res) => {
   const result = await Todo.findOneAndDelete({
-    _id: req.params.todo_id,
-    user_id: req.params.user_id
+    _id: req.params.todo_id
   });
   res.send(result);
 });
@@ -89,7 +88,7 @@ router.put("/update-status/:todo_id", async (req, res) => {
   const todo = await Todo.findOneAndUpdate(
     { _id: req.params.todo_id },
     {
-      $set: { isDone: !req.body.isDone }
+      $set: { isDone: req.body.isDone }
     },
     { new: true }
   );

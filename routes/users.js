@@ -15,7 +15,14 @@ const router = express.Router();
 router.get("/:id", async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.id });
-    res.send(user);
+    const userToBeSent = _.pick(user, [
+      "_id",
+      "first_name",
+      "last_name",
+      "email",
+      "added_date"
+    ]);
+    res.send(userToBeSent);
   } catch (ex) {
     res.status(400).send(ex.message);
   }
@@ -24,14 +31,14 @@ router.get("/:id", async (req, res) => {
 /*
  * get the list of all users
  */
-router.get("/", async (req, res) => {
-  try {
-    const users = await User.find();
-    res.send(users);
-  } catch (ex) {
-    res.status(400).send(ex.message);
-  }
-});
+// router.get("/", async (req, res) => {
+//   try {
+//     const users = await User.find();
+//     res.send(users);
+//   } catch (ex) {
+//     res.status(400).send(ex.message);
+//   }
+// });
 
 /*
  * register a new user
