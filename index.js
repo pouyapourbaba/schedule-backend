@@ -1,9 +1,11 @@
+require("express-async-errors")
 const morgan = require("morgan")
 const helmet = require("helmet")
 const cors = require("cors");
 const config = require("config");
 const express = require("express");
 const mongoose = require("mongoose");
+const error = require("./middleware/error")
 const users = require("./routes/users");
 const login = require("./routes/login");
 const todos = require("./routes/todos");
@@ -34,6 +36,9 @@ app.use("/api/users", users);
 app.use("/api/login", login);
 app.use("/api/todos", todos);
 app.use("/api/tasks", tasks);
+
+// error handler middleware
+app.use(error)
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}...`));

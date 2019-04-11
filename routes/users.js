@@ -9,11 +9,11 @@ const {
 const express = require("express");
 const router = express.Router();
 
+
 /*
  * get the user by its id
  */
 router.get("/:id", async (req, res) => {
-  try {
     const user = await User.findOne({ _id: req.params.id });
     const userToBeSent = _.pick(user, [
       "_id",
@@ -23,9 +23,6 @@ router.get("/:id", async (req, res) => {
       "added_date"
     ]);
     res.send(userToBeSent);
-  } catch (ex) {
-    res.status(400).send(ex.message);
-  }
 });
 
 /*
