@@ -34,6 +34,21 @@ router.get("/:user_id/:week", async (req, res) => {
     res.status(400).send(ex.message);
   }
 });
+/* ****************************************
+// get tasks based on the user
+**************************************** */
+router.get("/:user_id/", async (req, res) => {
+  try {
+    const tasks = await Task.find({
+      user_id: req.params.user_id
+    })
+      .populate("user_id")
+      .select(["title", "days", "weekInYear", "month"]);
+    res.send(tasks);
+  } catch (ex) {
+    res.status(400).send(ex.message);
+  }
+});
 
 /* *************
 // delete a task
