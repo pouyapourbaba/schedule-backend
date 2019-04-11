@@ -1,4 +1,5 @@
 require("express-async-errors")
+const winston = require("winston")
 const morgan = require("morgan")
 const helmet = require("helmet")
 const cors = require("cors");
@@ -11,6 +12,8 @@ const login = require("./routes/login");
 const todos = require("./routes/todos");
 const tasks = require("./routes/tasks");
 const app = express();
+
+winston.add(new winston.transports.File({ filename: "logfile.log"}))
 
 // check the jwtPrivateKey in the environment variables
 if (!config.get("jwtPrivateKey")) {
