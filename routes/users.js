@@ -6,27 +6,37 @@ const {
   validateUser,
   validatePasswordComplexity
 } = require("../models/user");
-const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 
-/* ************************
-// GET THE USER INFORMATION
-** ***********************/
-router.get("/:id", async (req,res) => {
+/*
+ * get the user by its id
+ */
+router.get("/:id", async (req, res) => {
   try {
-    const user = await User.findOne({_id: req.params.id});
+    const user = await User.findOne({ _id: req.params.id });
     res.send(user);
-    
   } catch (ex) {
-    res.status(400).send(ex.message)
+    res.status(400).send(ex.message);
   }
-})
+});
 
-/* ***************
-// post a new user
-** **************/
-router.post("/", async (req, res) => {
+/*
+ * get the list of all users
+ */
+router.get("/", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.send(users);
+  } catch (ex) {
+    res.status(400).send(ex.message);
+  }
+});
+
+/*
+ * register a new user
+ */
+router.post("/register", async (req, res) => {
   // validate the user by Joi
   const { error } = validateUser(req.body, joiSchema);
   if (error) return res.status(400).send(error.details[0].message);
@@ -68,10 +78,10 @@ router.post("/", async (req, res) => {
     );
 });
 
-/* ***************************************************
-// update the properties of a user except the password
-** **************************************************/
-router.put("/:id", async (req, res) => {
+/*
+ * update the properties of a user except its password
+ */
+router.put("/update/:id", async (req, res) => {
   // validate the user property by Joi
   const property = Object.keys(req.body)[0];
   const schema = { [property]: joiSchema[property] };
