@@ -1,39 +1,19 @@
-const morgan = require("morgan")
-const helmet = require("helmet")
-const cors = require("cors");
-const config = require("config");
+const winston = require("winston")
 const express = require("express");
-const mongoose = require("mongoose");
-const users = require("./routes/users");
-const login = require("./routes/login");
-const todos = require("./routes/todos");
-const tasks = require("./routes/tasks");
 const app = express();
 
-// check the jwtPrivateKey in the environment variables
-if (!config.get("jwtPrivateKey")) {
-  console.error("FATAL ERROR: jwtPrivateKey is not defined.");
-  process.exit(1);
-}
+// set up the logging functionalities
+const logger = require("./startup/logging")
+logger.mainLogger()
 
-mongoose
-  .connect("mongodb://localhost/scheduler", {
-    useCreateIndex: true,
-    useNewUrlParser: true
-  })
-  .then(() => console.log("Connected to MongoDB.."))
-  .catch(err => console.error("Could not connect to MongoDB..", err));
+// set the route handlers
+require("./startup/routes")(app);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors());
-app.use(helmet())
-app.use(morgan("dev"))
+// initialize the DB connection
+require("./startup/db")();
 
-app.use("/api/users", users);
-app.use("/api/login", login);
-app.use("/api/todos", todos);
-app.use("/api/tasks", tasks);
+// configuration logic
+require("./startup/config")()
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Listening on port ${port}...`));
+app.listen(port, () => logger.infoLogger(`Listening on port ${port}...`));
