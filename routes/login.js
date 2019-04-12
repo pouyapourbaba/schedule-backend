@@ -6,6 +6,9 @@ const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 
+/*
+ * login a user
+ */
 router.post("/", async (req, res) => {
   // validate the user by Joi and JOI
   const { error } = validate(req.body);
@@ -25,7 +28,9 @@ router.post("/", async (req, res) => {
   res.send(token);
 });
 
-// validation function
+/*
+ * validation function
+ */
 function validate(req) {
   const schema = {
     email: Joi.string()
