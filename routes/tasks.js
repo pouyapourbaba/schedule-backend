@@ -1,7 +1,33 @@
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 const express = require("express");
 const router = express.Router();
 const _ = require("lodash");
 const { Task, validateTask } = require("../models/task");
+
+/*
+ * aggregate based on the month and sum up the total duration
+ */
+router.get("/total-monthly-duration/:user_id", async (req, res) => {
+  const tasks = await Task.aggregate([
+    { $match: { user_id: ObjectId(req.params.user_id) } },
+    { $unwind: "$days" },
+    { $group: { _id: "$month" , total: {$sum: "$days.duration"} }}
+  ]);
+  res.send(tasks);
+});
+
+/*
+ * aggregate based on the week and sum up the total duration
+ */
+router.get("/total-weekly-duration/:user_id", async (req, res) => {
+  const tasks = await Task.aggregate([
+    { $match: { user_id: ObjectId(req.params.user_id) } },
+    { $unwind: "$days" },
+    { $group: { _id: "$weekInYear" , total: {$sum: "$days.duration"} }}
+  ]);
+  res.send(tasks);
+});
 
 /*
  * post a new task for a user by its id
