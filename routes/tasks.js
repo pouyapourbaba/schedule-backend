@@ -8,7 +8,7 @@ const { Task, validateTask } = require("../models/task");
 /*
  * aggregate based on the month and sum up the total duration
  */
-router.get("/total-monthly-duration/:user_id", async (req, res) => {
+router.get("/total-monthly-durations/:user_id", async (req, res) => {
   const tasks = await Task.aggregate([
     { $match: { user_id: ObjectId(req.params.user_id) } },
     { $unwind: "$days" },
@@ -20,7 +20,7 @@ router.get("/total-monthly-duration/:user_id", async (req, res) => {
 /*
  * aggregate based on the week and sum up the total duration
  */
-router.get("/total-weekly-duration/:user_id", async (req, res) => {
+router.get("/total-weekly-durations/:user_id", async (req, res) => {
   const tasks = await Task.aggregate([
     { $match: { user_id: ObjectId(req.params.user_id) } },
     { $unwind: "$days" },
