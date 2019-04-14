@@ -15,5 +15,7 @@ require("./startup/db")();
 // configuration logic
 require("./startup/config")()
 
+require("./startup/prod")(app)
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => logger.infoLogger(`Listening on port ${port}...`));

@@ -1,10 +1,10 @@
-const winston = require("winston");
+const config = require("config");
 const mongoose = require("mongoose");
 const logger = require("./logging")
 
 module.exports = function() {
   mongoose
-    .connect("mongodb://localhost/scheduler", {
+    .connect(config.get("db"), {
       useCreateIndex: true,
       useNewUrlParser: true
     })
