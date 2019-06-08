@@ -87,19 +87,22 @@ router.post("/register", async (req, res) => {
  */
 router.put("/update/:id", async (req, res) => {
   // validate the user property by Joi
-  const property = Object.keys(req.body)[0];
-  const schema = { [property]: joiSchema[property] };
-  const { error } = validateUser(req.body, schema);
-  if (error) return res.status(400).send(error.details[0].message);
+  // const property = Object.keys(req.body)[0];
+  // const schema = { [property]: joiSchema[property] };
+  // const { error } = validateUser(req.body, schema);
+  // if (error) return res.status(400).send(error.details[0].message);
+
+  if(_.isEmpty(req.body)) return;
+
 
   const user = await User.findOneAndUpdate(
     { _id: req.params.id },
     {
-      $set: { [property]: req.body[property] }
+      $set:  req.body 
     },
     { new: true }
   );
-  res.send(user);
+  res.send(_.pick(user, ["_id", "first_name", "last_name", "email", "added_date"]));
 });
 
 module.exports = router;

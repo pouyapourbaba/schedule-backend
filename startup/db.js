@@ -4,7 +4,7 @@ const logger = require("./logging")
 
 module.exports = function() {
   mongoose
-    .connect(config.get("db"), {
+    .connect("mongodb://localhost/scheduler", {
       useCreateIndex: true,
       useNewUrlParser: true
     })
