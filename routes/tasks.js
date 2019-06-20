@@ -3,7 +3,7 @@ const ObjectId = mongoose.Types.ObjectId;
 const express = require("express");
 const router = express.Router();
 const _ = require("lodash");
-const { Task, validateTask } = require("../models/task");
+const { Task, validateTask } = require("../models/Task");
 
 /*
  * aggregate based on the month and sum up the total duration

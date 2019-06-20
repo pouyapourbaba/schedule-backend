@@ -3,7 +3,7 @@ const router = express.Router();
 const gravatar = require("gravatar");
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
-const { User, validateUser } = require("../models/user");
+const { User, validateUser } = require("../models/User");
 const { validationResult } = require("express-validator");
 
 // @route   POST api/users
@@ -39,7 +39,7 @@ router.post("/", validateUser, async (req, res) => {
   user.password = await bcrypt.hash(user.password, salt);
 
   // save the user in DB
-  user = await user.save();
+  await user.save();
 
   // email verification? no direct login after registration
   // ... Code
