@@ -37,7 +37,6 @@ router.post("/", [auth, profileValidator], async (req, res) => {
     phone,
     address,
     birthday,
-    gender,
     country,
     city,
     postal_code,
@@ -58,7 +57,6 @@ router.post("/", [auth, profileValidator], async (req, res) => {
   if (phone) profileFields.phone = phone;
   if (address) profileFields.address = address;
   if (birthday) profileFields.birthday = birthday;
-  if (gender) profileFields.gender = gender;
   if (country) profileFields.country = country;
   if (city) profileFields.city = city;
   if (postal_code) profileFields.postal_code = postal_code;

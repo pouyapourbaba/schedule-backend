@@ -12,7 +12,6 @@ const ProfileSchema = new mongoose.Schema({
     maxlength: 255
   },
   birthday: { type: String, maxlength: 255 },
-  gender: { type: String, maxlength: 32 },
   country: { type: String, maxlength: 32 },
   postal_code: { type: String, maxlength: 32 },
   city: { type: String, maxlength: 32 },
@@ -44,9 +43,6 @@ const profileValidator = [
   ).isLength({ max: 255 }),
   check("birthday", "Birthday must contain less than 255 characters").isLength({
     max: 255
-  }),
-  check("gender", "Gender must contain less than 32 characters").isLength({
-    max: 32
   }),
   check("country", "Country must contain less than 32 characters").isLength({
     max: 32

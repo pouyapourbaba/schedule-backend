@@ -3,15 +3,15 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const { User, userAuthenticationValidator } = require("../models/User");
 const { validationResult } = require("express-validator");
+const auth = require("../middleware/auth");
 
 // @route   GET api/auth
-// @desc    Register user
-// @access  Public
-// router.get("/", async (req, res) => {
-//   const user = await User.findById(req.user.id).select("-password");
-//  console.log("user ", user);
-//   res.json(user);
-// });
+// @desc    Test user
+// @access  Private
+router.get("/", auth, async (req, res) => {
+  const user = await User.findById(req.user.id).select("-password");
+  res.send(user);
+});
 
 // @route   POST api/auth
 // @desc    Authenticate user & get token
