@@ -21,7 +21,10 @@ router.get("/", auth, async (req, res) => {
 });
 
 /*
- * post a new task for a user by its id
+ * __TESTED
+ * __POST   :     /api/tasks
+ * __DESC   :     post a new task for a user
+ * __AUTH   :     required
  */
 router.post("/", auth, async (req, res) => {
   const userId = req.user.id;
@@ -71,29 +74,52 @@ router.get("/sum-months", auth, async (req, res) => {
 });
 
 /*
- * get tasks based on the user and the week
+ * __TESTED
+ * __GET    :     /api/tasks/week/:number
+ * __DESC   :     get tasks based on the user and the week
+ * __AUTH   :     required
  */
-router.get("/:week_number", auth, async (req, res) => {
+router.get("/week/:number", auth, async (req, res) => {
   const tasks = await Task.find({
-    user_id: req.user.id,
-    weekInYear: req.params.week_number
+    userId: ObjectId(req.user.id),
+    week: req.params.number
   })
-    // .populate("user_id")
-    .select(["title", "days", "user_id"]);
-  res.send(tasks);
+    // .populate("userId")
+    .select(["title", "days", "userId"]);
+
+  if (tasks.length === 0) return res.status(404).send("no tasks found");
+  res.json(tasks);
+});
+
+/*
+ * __TESTED
+ * __GET    :     /api/tasks/month/:number
+ * __DESC   :     get tasks based on the user and the month
+ * __AUTH   :     required
+ */
+router.get("/month/:number", auth, async (req, res) => {
+  const tasks = await Task.find({
+    userId: ObjectId(req.user.id),
+    month: req.params.number
+  })
+    // .populate("userId")
+    .select(["title", "days", "userId"]);
+
+  if (tasks.length === 0) return res.status(404).send("no tasks found");
+  res.json(tasks);
 });
 
 /*
  * get tasks based on the user
  */
-router.get("/", auth, async (req, res) => {
-  const tasks = await Task.find({
-    user_id: req.user.id
-  })
-    // .populate("user_id")
-    .select(["title", "days", "weekInYear", "month", "user_id"]);
-  res.send(tasks);
-});
+// router.get("/", auth, async (req, res) => {
+//   const tasks = await Task.find({
+//     user_id: req.user.id
+//   })
+//     // .populate("user_id")
+//     .select(["title", "days", "weekInYear", "month", "user_id"]);
+//   res.send(tasks);
+// });
 
 /*
  * delete a task

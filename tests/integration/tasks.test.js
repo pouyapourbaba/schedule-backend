@@ -60,7 +60,7 @@ describe("/api/users", () => {
         month: 1,
         week: 1,
         days: [
-          { day: "monday", duration: 250 },
+          { day: "monday", duration: 1 },
           { day: "tuesday", duration: 1 },
           { day: "wednesday", duration: 1 },
           { day: "thursday", duration: 1 },
@@ -70,16 +70,32 @@ describe("/api/users", () => {
         ]
       },
       {
-        title: "task1",
+        title: "task2",
         userId: userId1,
         year: 1,
         month: 1,
+        week: 1,
+        days: [
+          { day: "monday", duration: 1 },
+          { day: "tuesday", duration: 1 },
+          { day: "wednesday", duration: 1 },
+          { day: "thursday", duration: 1 },
+          { day: "friday", duration: 1 },
+          { day: "saturday", duration: 1 },
+          { day: "sunday", duration: 1 }
+        ]
+      },
+      {
+        title: "task3",
+        userId: userId1,
+        year: 1,
+        month: 2,
         week: 2,
         days: [
           { day: "monday", duration: 1 },
           { day: "tuesday", duration: 1 },
           { day: "wednesday", duration: 1 },
-          { day: "thursday", duration: 54 },
+          { day: "thursday", duration: 1 },
           { day: "friday", duration: 1 },
           { day: "saturday", duration: 1 },
           { day: "sunday", duration: 1 }
@@ -142,7 +158,7 @@ describe("/api/users", () => {
       const response = await api.get(`/api/tasks`).set("x-auth-token", token1);
 
       expect(response.status).toBe(200);
-      expect(response.body.length).toBe(2);
+      expect(response.body.length).toBe(3);
       expect(response.body[0].title).toBe("task1");
       expect(response.body[0].userId.toString()).toEqual(userId1.toString());
     });
@@ -226,9 +242,7 @@ describe("/api/users", () => {
 
       expect(response.status).toBe(200);
       expect(response.body[0].total).toBe(aggregate(tasks, userId1, "week", 2));
-      expect(response.body[0]._id).toBe(tasks[1].week);
       expect(response.body[1].total).toBe(aggregate(tasks, userId1, "week", 1));
-      expect(response.body[1]._id).toBe(tasks[0].week);
     });
 
     it("should return 404 if no tasks were found", async () => {
@@ -246,7 +260,7 @@ describe("/api/users", () => {
       expect(response.status).toBe(401);
     });
 
-    it("should return the array of the weekly sum for the user", async () => {
+    it("should return the array of the monthly sum for the user", async () => {
       Task.collection.insert(tasks);
 
       const response = await api
@@ -254,8 +268,12 @@ describe("/api/users", () => {
         .set("x-auth-token", token1);
 
       expect(response.status).toBe(200);
-      expect(response.body[0].total).toBe(aggregate(tasks, userId1, "month", 1));
-      expect(response.body[0]._id).toBe(tasks[1].month);
+      expect(response.body[0].total).toBe(
+        aggregate(tasks, userId1, "month", 2)
+      );
+      expect(response.body[1].total).toBe(
+        aggregate(tasks, userId1, "month", 1)
+      );
     });
 
     it("should return 404 if no tasks were found", async () => {
@@ -264,6 +282,64 @@ describe("/api/users", () => {
         .set("x-auth-token", token1);
 
       expect(response.status).toBe(404);
+    });
+  });
+
+  describe("GET /week/:number", () => {
+    it("should return 401 if the user is not logged in", async () => {
+      const response = await api.get("/api/tasks/week/1");
+
+      expect(response.status).toBe(401);
+    });
+
+    it("should return 404 if there is no task for that week", async () => {
+      const response = await api
+        .get("/api/tasks/week/65654")
+        .set("x-auth-token", token1);
+
+      expect(response.status).toBe(404);
+    });
+
+    it("should return the tasks for the week", async () => {
+      Task.collection.insert(tasks);
+
+      const response = await api
+        .get("/api/tasks/week/1")
+        .set("x-auth-token", token1);
+
+      expect(response.status).toBe(200);
+      expect(response.body.length).toBe(2);
+      expect(response.body.some(t => t.title === "task1")).toBeTruthy();
+      expect(response.body.some(t => t.title === "task2")).toBeTruthy();
+    });
+  });
+
+  describe("GET /month/:number", () => {
+    it("should return 401 if the user is not logged in", async () => {
+      const response = await api.get("/api/tasks/month/1");
+
+      expect(response.status).toBe(401);
+    });
+
+    it("should return 404 if there is no task for that week", async () => {
+      const response = await api
+        .get("/api/tasks/month/65654")
+        .set("x-auth-token", token1);
+
+      expect(response.status).toBe(404);
+    });
+
+    it("should return the tasks for the month", async () => {
+      Task.collection.insert(tasks);
+
+      const response = await api
+        .get("/api/tasks/month/1")
+        .set("x-auth-token", token1);
+
+      expect(response.status).toBe(200);
+      expect(response.body.length).toBe(2);
+      expect(response.body.some(t => t.title === "task1")).toBeTruthy();
+      expect(response.body.some(t => t.title === "task2")).toBeTruthy();
     });
   });
 });
