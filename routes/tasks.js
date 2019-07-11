@@ -7,16 +7,14 @@ const { Task, validateTask } = require("../models/Task");
 const auth = require("../middleware/auth");
 
 /*
- * __TESTED__
- * @ TODO -> right now the userId is given via the route params
- *           however, we can get the userId via the auth middleware
- *                      req.user.id
- *           but for passing the test it was not possible to do that
- *           because a valid userId from a logged in user is not used
+ * __TESTED
+ * __GET    :     /api/tasks
+ * __DESC   :     get the tasks for a user
+ * __AUTH   :     required
  */
-router.get("/:userId", auth, async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
-    const tasks = await Task.find({ userId: req.params.userId });
+    const tasks = await Task.find({ userId: ObjectId(req.user.id) });
     if (tasks.length === 0) return res.status(404).send("no tasks found");
     res.json(tasks);
   } catch (error) {}
@@ -33,13 +31,7 @@ router.post("/", auth, async (req, res) => {
   if (!req.body.month) return res.status(400).send("Month is required");
   if (!req.body.week) return res.status(400).send("Week is required");
 
-  const taskObj = _.pick(req.body, [
-    "title",
-    "year",
-    "month",
-    "week",
-    "days"
-  ]);
+  const taskObj = _.pick(req.body, ["title", "year", "month", "week", "days"]);
 
   let task = new Task({ ...taskObj, userId });
   task = await task.save();
@@ -47,35 +39,35 @@ router.post("/", auth, async (req, res) => {
 });
 
 /*
- * __TESTED__
- * aggregate based on the month and sum up the total duration
- * 
- * @ TODO -> right now the userId is given via the route params
- *           however, we can get the userId via the auth middleware
- *                      req.user.id
- *           but for passing the test it was not possible to do that
- *           because a valid userId from a logged in user is not used
+ * __TESTED
+ * __GET    :     /api/tasks/sum-weeks
+ * __DESC   :     aggregate based on the week and sum up the total duration
+ * __AUTH   :     required
  */
-router.get("/total-monthly-durations/:user_id", async (req, res) => {
+router.get("/sum-weeks", auth, async (req, res) => {
   const tasks = await Task.aggregate([
-    { $match: { user_id: ObjectId(req.params.user_id) } },
-    { $unwind: "$days" },
-    { $group: { _id: "$month", total: { $sum: "$days.duration" } } }
-  ]);
-  res.send(tasks);
-});
-
-/*
- * aggregate based on the week and sum up the total duration
- */
-router.get("/sum-weeks/:userId", auth, async (req, res) => {
-  const tasks = await Task.aggregate([
-    { $match: { userId: ObjectId(req.params.userId) } },
+    { $match: { userId: ObjectId(req.user.id) } },
     { $unwind: "$days" },
     { $group: { _id: "$week", total: { $sum: "$days.duration" } } }
   ]);
-  // if(tasks.length ==)
+  if (tasks.length === 0) return res.status(404).send("no tasks were found");
   res.json(tasks);
+});
+
+/*
+ * __TESTED
+ * __GET    :     /api/tasks/sum-weeks
+ * __DESC   :     aggregate based on the month and sum up the total duration
+ * __AUTH   :     required
+ */
+router.get("/sum-months", auth, async (req, res) => {
+  const tasks = await Task.aggregate([
+    { $match: { userId: ObjectId(req.user.id) } },
+    { $unwind: "$days" },
+    { $group: { _id: "$month", total: { $sum: "$days.duration" } } }
+  ]);
+  if (tasks.length === 0) res.status(404).send("no tasks were found");
+  res.send(tasks);
 });
 
 /*

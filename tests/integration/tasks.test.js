@@ -1,23 +1,57 @@
 const request = require("supertest");
+const jwt = require("jsonwebtoken");
+const config = require("config");
 const { Task } = require("../../models/Task");
 const { User } = require("../../models/User");
 const mongoose = require("mongoose");
+const { aggregate } = require("../testHelpers");
 let server;
 let api;
 let userId1;
 let userId2;
-let token;
+let token1;
+let token2;
 let tasks;
 let task;
 
 describe("/api/users", () => {
   // run the server
-  beforeEach(() => {
+  beforeAll(async () => {
     server = require("../../index");
     api = request(server);
-    userId1 = mongoose.Types.ObjectId();
-    userId2 = mongoose.Types.ObjectId();
-    token = new User().generateAuthToken();
+
+    // register two users and use token created from them to store tasks and login
+    const user1 = {
+      first_name: "user1",
+      last_name: "user1",
+      email: "user1@gmail.com",
+      password: "password"
+    };
+    const user2 = {
+      first_name: "user2",
+      last_name: "user2",
+      email: "user2@gmail.com",
+      password: "password"
+    };
+
+    const response1 = await api.post("/api/users").send(user1);
+    token1 = response1.body.token;
+    const response2 = await api.post("/api/users").send(user2);
+    token2 = response2.body.token;
+
+    const decodedUser1 = await jwt.decode(token1, config.get("jwtPrivateKey"));
+    const decodedUser2 = await jwt.decode(token2, config.get("jwtPrivateKey"));
+
+    userId1 = mongoose.Types.ObjectId(decodedUser1.id);
+    userId2 = mongoose.Types.ObjectId(decodedUser2.id);
+
+    await server.close();
+  });
+
+  beforeEach(async () => {
+    server = require("../../index");
+    api = request(server);
+
     tasks = [
       {
         title: "task1",
@@ -26,7 +60,7 @@ describe("/api/users", () => {
         month: 1,
         week: 1,
         days: [
-          { day: "monday", duration: 1 },
+          { day: "monday", duration: 250 },
           { day: "tuesday", duration: 1 },
           { day: "wednesday", duration: 1 },
           { day: "thursday", duration: 1 },
@@ -45,7 +79,7 @@ describe("/api/users", () => {
           { day: "monday", duration: 1 },
           { day: "tuesday", duration: 1 },
           { day: "wednesday", duration: 1 },
-          { day: "thursday", duration: 1 },
+          { day: "thursday", duration: 54 },
           { day: "friday", duration: 1 },
           { day: "saturday", duration: 1 },
           { day: "sunday", duration: 1 }
@@ -91,6 +125,10 @@ describe("/api/users", () => {
     await Task.remove({});
   });
 
+  afterAll(async () => {
+    await await User.remove({});
+  });
+
   describe("GET /", () => {
     it("should return 401 if the client is not logged in", async () => {
       const response = await api.get("/api/tasks");
@@ -101,9 +139,7 @@ describe("/api/users", () => {
       // when saving tasks via task.save() it is not required to declare the duration
       // because it is by default it will be set to zero
       Task.collection.insert(tasks);
-      const response = await api
-        .get(`/api/tasks/${userId1.toString()}`)
-        .set("x-auth-token", token);
+      const response = await api.get(`/api/tasks`).set("x-auth-token", token1);
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(2);
@@ -112,9 +148,7 @@ describe("/api/users", () => {
     });
 
     it("should return 404 if no tasks are found for that user", async () => {
-      const response = await api
-        .get(`/api/tasks/${userId1.toString()}`)
-        .set("x-auth-token", token);
+      const response = await api.get(`/api/tasks`).set("x-auth-token", token1);
 
       expect(response.status).toBe(404);
     });
@@ -131,7 +165,7 @@ describe("/api/users", () => {
       delete task.title;
       const response = await api
         .post("/api/tasks")
-        .set("x-auth-token", token)
+        .set("x-auth-token", token1)
         .send(task);
       expect(response.status).toBe(400);
     });
@@ -140,7 +174,7 @@ describe("/api/users", () => {
       delete task.year;
       const response = await api
         .post("/api/tasks")
-        .set("x-auth-token", token)
+        .set("x-auth-token", token1)
         .send(task);
       expect(response.status).toBe(400);
     });
@@ -149,7 +183,7 @@ describe("/api/users", () => {
       delete task.month;
       const response = await api
         .post("/api/tasks")
-        .set("x-auth-token", token)
+        .set("x-auth-token", token1)
         .send(task);
       expect(response.status).toBe(400);
     });
@@ -158,7 +192,7 @@ describe("/api/users", () => {
       delete task.week;
       const response = await api
         .post("/api/tasks")
-        .set("x-auth-token", token)
+        .set("x-auth-token", token1)
         .send(task);
       expect(response.status).toBe(400);
     });
@@ -166,7 +200,7 @@ describe("/api/users", () => {
     it("should return 200 when the task is successfully saved in the DB", async () => {
       const response = await api
         .post("/api/tasks")
-        .set("x-auth-token", token)
+        .set("x-auth-token", token1)
         .send(task);
 
       const tasksInDbAtEnd = await Task.find();
@@ -184,17 +218,52 @@ describe("/api/users", () => {
     });
 
     it("should return the array of the weekly sum for the user", async () => {
-      Task.collection.insert(tasks)
+      Task.collection.insert(tasks);
 
       const response = await api
-        .get(`/api/tasks/sum-weeks/${userId1.toString()}`)
-        .set("x-auth-token", token);
+        .get(`/api/tasks/sum-weeks`)
+        .set("x-auth-token", token1);
 
       expect(response.status).toBe(200);
-      expect(response.body[0].total).toBe(7);
+      expect(response.body[0].total).toBe(aggregate(tasks, userId1, "week", 2));
       expect(response.body[0]._id).toBe(tasks[1].week);
-      expect(response.body[0].total).toBe(7);
+      expect(response.body[1].total).toBe(aggregate(tasks, userId1, "week", 1));
       expect(response.body[1]._id).toBe(tasks[0].week);
+    });
+
+    it("should return 404 if no tasks were found", async () => {
+      const response = await api
+        .get("/api/tasks/sum-weeks")
+        .set("x-auth-token", token1);
+
+      expect(response.status).toBe(404);
+    });
+  });
+
+  describe("GET /sum-months", () => {
+    it("should retun 401 if the user is not authorized", async () => {
+      const response = await api.get("/api/tasks/sum-months");
+      expect(response.status).toBe(401);
+    });
+
+    it("should return the array of the weekly sum for the user", async () => {
+      Task.collection.insert(tasks);
+
+      const response = await api
+        .get(`/api/tasks/sum-months`)
+        .set("x-auth-token", token1);
+
+      expect(response.status).toBe(200);
+      expect(response.body[0].total).toBe(aggregate(tasks, userId1, "month", 1));
+      expect(response.body[0]._id).toBe(tasks[1].month);
+    });
+
+    it("should return 404 if no tasks were found", async () => {
+      const response = await api
+        .get("/api/tasks/sum-months")
+        .set("x-auth-token", token1);
+
+      expect(response.status).toBe(404);
     });
   });
 });
