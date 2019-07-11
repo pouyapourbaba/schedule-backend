@@ -8,27 +8,28 @@ const router = express.Router();
  * get the list of all todos for a user by the user_id
  */
 router.get("/", auth, async (req, res) => {
-    const todos = await Todo.find({ user_id: req.user.id });
-    res.send(todos);
+  const todos = await Todo.find({ user_id: req.user.id });
+  res.send(todos);
 });
 
 /*
  * get todos based on the user and the week
  */
 router.get("/:week_number", auth, async (req, res) => {
-    const todos = await Todo.find({
-      user_id: req.user.id,
-      weekInYear: req.params.week_number
-    })
-      // .populate("user_id")
-      .select(["title", "isDone"]);
-    res.send(todos);
+  const todos = await Todo.find({
+    user_id: req.user.id,
+    weekInYear: req.params.week_number
+  })
+    // .populate("user_id")
+    .select(["title", "isDone"]);
+  res.send(todos);
 });
 
 /*
  * post a new todo
  */
-router.post("/new", auth, async (req, res) => {
+router.post("/", auth, async (req, res) => {
+  console.log(req.body);
   // validate the todo by Joi
   const { error } = validateTodo(req.body);
   if (error) return res.status(400).send("Invalid todo item.");
@@ -51,7 +52,8 @@ router.post("/new", auth, async (req, res) => {
 /*
  * delete a todo
  */
-router.delete("/delete/:todo_id/", async (req, res) => {
+router.delete("/:todo_id", auth, async (req, res) => {
+  console.log(req.params.todo_id);
   const result = await Todo.findOneAndDelete({
     _id: req.params.todo_id
   });

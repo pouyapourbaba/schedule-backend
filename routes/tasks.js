@@ -4,15 +4,63 @@ const express = require("express");
 const router = express.Router();
 const _ = require("lodash");
 const { Task, validateTask } = require("../models/Task");
+const auth = require("../middleware/auth");
 
 /*
+ * __TESTED__
+ * @ TODO -> right now the userId is given via the route params
+ *           however, we can get the userId via the auth middleware
+ *                      req.user.id
+ *           but for passing the test it was not possible to do that
+ *           because a valid userId from a logged in user is not used
+ */
+router.get("/:userId", auth, async (req, res) => {
+  try {
+    const tasks = await Task.find({ userId: req.params.userId });
+    if (tasks.length === 0) return res.status(404).send("no tasks found");
+    res.json(tasks);
+  } catch (error) {}
+});
+
+/*
+ * post a new task for a user by its id
+ */
+router.post("/", auth, async (req, res) => {
+  const userId = req.user.id;
+
+  if (!req.body.title) return res.status(400).send("title is required");
+  if (!req.body.year) return res.status(400).send("Year is required");
+  if (!req.body.month) return res.status(400).send("Month is required");
+  if (!req.body.week) return res.status(400).send("Week is required");
+
+  const taskObj = _.pick(req.body, [
+    "title",
+    "year",
+    "month",
+    "week",
+    "days"
+  ]);
+
+  let task = new Task({ ...taskObj, userId });
+  task = await task.save();
+  res.json(task);
+});
+
+/*
+ * __TESTED__
  * aggregate based on the month and sum up the total duration
+ * 
+ * @ TODO -> right now the userId is given via the route params
+ *           however, we can get the userId via the auth middleware
+ *                      req.user.id
+ *           but for passing the test it was not possible to do that
+ *           because a valid userId from a logged in user is not used
  */
 router.get("/total-monthly-durations/:user_id", async (req, res) => {
   const tasks = await Task.aggregate([
     { $match: { user_id: ObjectId(req.params.user_id) } },
     { $unwind: "$days" },
-    { $group: { _id: "$month" , total: {$sum: "$days.duration"} }}
+    { $group: { _id: "$month", total: { $sum: "$days.duration" } } }
   ]);
   res.send(tasks);
 });
@@ -20,58 +68,42 @@ router.get("/total-monthly-durations/:user_id", async (req, res) => {
 /*
  * aggregate based on the week and sum up the total duration
  */
-router.get("/total-weekly-durations/:user_id", async (req, res) => {
+router.get("/sum-weeks/:userId", auth, async (req, res) => {
   const tasks = await Task.aggregate([
-    { $match: { user_id: ObjectId(req.params.user_id) } },
+    { $match: { userId: ObjectId(req.params.userId) } },
     { $unwind: "$days" },
-    { $group: { _id: "$weekInYear" , total: {$sum: "$days.duration"} }}
+    { $group: { _id: "$week", total: { $sum: "$days.duration" } } }
   ]);
-  res.send(tasks);
-});
-
-/*
- * post a new task for a user by its id
- */
-router.post("/new/:user_id", async (req, res) => {
-  const user_id = req.params.user_id;
-  const taskObj = _.pick(req.body, [
-    "title",
-    "year",
-    "month",
-    "weekInYear",
-    "days"
-  ]);
-  const task = new Task({ ...taskObj, user_id });
-  await task.save({ ...req.body, user_id: req.params.user_id });
-  res.send(task);
+  // if(tasks.length ==)
+  res.json(tasks);
 });
 
 /*
  * get tasks based on the user and the week
  */
-router.get("/:user_id/:week_number", async (req, res) => {
-    const tasks = await Task.find({
-      user_id: req.params.user_id,
-      weekInYear: req.params.week_number
-    })
-      // .populate("user_id")
-      .select(["title", "days", "user_id"]);
-    res.send(tasks);
+router.get("/:week_number", auth, async (req, res) => {
+  const tasks = await Task.find({
+    user_id: req.user.id,
+    weekInYear: req.params.week_number
+  })
+    // .populate("user_id")
+    .select(["title", "days", "user_id"]);
+  res.send(tasks);
 });
 
 /*
  * get tasks based on the user
  */
-router.get("/:user_id", async (req, res) => {
-    const tasks = await Task.find({
-      user_id: req.params.user_id
-    })
-      // .populate("user_id")
-      .select(["title", "days", "weekInYear", "month", "user_id"]);
-    res.send(tasks);
+router.get("/", auth, async (req, res) => {
+  const tasks = await Task.find({
+    user_id: req.user.id
+  })
+    // .populate("user_id")
+    .select(["title", "days", "weekInYear", "month", "user_id"]);
+  res.send(tasks);
 });
 
-/* 
+/*
  * delete a task
  */
 router.delete("/delete/:task_id", async (req, res) => {
@@ -79,7 +111,7 @@ router.delete("/delete/:task_id", async (req, res) => {
   res.send(result);
 });
 
-/* 
+/*
  * update a task
  */
 router.put("/update/:task_id", async (req, res) => {

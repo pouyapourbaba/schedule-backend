@@ -1,5 +1,5 @@
 const winston = require("winston");
-require("winston-mongodb");
+// require("winston-mongodb");
 require("express-async-errors");
 
 module.exports.mainLogger = function() {
@@ -16,12 +16,12 @@ module.exports.mainLogger = function() {
 
   // log the errors into a file and the db
   winston.add(new winston.transports.File({ filename: "logfile.log" }));
-  winston.add(
-    new winston.transports.MongoDB({
-      db: "mongodb://localhost/scheduler",
-      level: "warn"
-    })
-  );
+  // winston.add(
+  //   new winston.transports.MongoDB({
+  //     db: "mongodb://localhost/scheduler",
+  //     level: "warn"
+  //   })
+  // );
 };
 
 // custome logger for logging infos on the console
@@ -30,10 +30,10 @@ module.exports.infoLogger = message =>
     .createLogger({
       transports: [new winston.transports.Console()],
       level: "info",
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.prettyPrint(),
-        winston.format.simple()
-      )
+      // format: winston.format.combine(
+      //   winston.format.colorize(),
+        // winston.format.prettyPrint(),
+        // winston.format.simple()
+      // )
     })
     .info(message);
