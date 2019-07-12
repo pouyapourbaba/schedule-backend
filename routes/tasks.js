@@ -124,9 +124,18 @@ router.get("/month/:number", auth, async (req, res) => {
 /*
  * delete a task
  */
-router.delete("/delete/:task_id", async (req, res) => {
-  const result = await Task.findOneAndDelete({ _id: req.params.task_id });
-  res.send(result);
+router.delete("/:taskId", auth, async (req, res) => {
+  if (!ObjectId.isValid(req.params.taskId))
+    return res.status(404).send("task not found");
+    
+  const result = await Task.findOneAndDelete({
+    _id: ObjectId(req.params.taskId),
+    userId: ObjectId(req.user.id)
+  });
+
+  if (!result || result.length === 0)
+    return res.status(404).send("task not found");
+  res.status(204).send(result);
 });
 
 /*
