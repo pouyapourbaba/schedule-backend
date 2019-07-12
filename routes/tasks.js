@@ -131,7 +131,10 @@ router.delete("/:taskId", auth, async (req, res) => {
 });
 
 /*
- * update a task
+ * __TESTED
+ * __UPDATE :     /api/tasks/:taskId
+ * __DESC   :     update a task
+ * __AUTH   :     required
  */
 router.put("/:taskId", auth, async (req, res) => {
   if (!ObjectId.isValid(req.params.taskId))

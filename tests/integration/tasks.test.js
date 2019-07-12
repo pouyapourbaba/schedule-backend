@@ -1,9 +1,9 @@
 const request = require("supertest");
 const jwt = require("jsonwebtoken");
 const config = require("config");
+const mongoose = require("mongoose");
 const { Task } = require("../../models/Task");
 const { User } = require("../../models/User");
-const mongoose = require("mongoose");
 const { aggregate } = require("../testHelpers");
 let server;
 let api;
