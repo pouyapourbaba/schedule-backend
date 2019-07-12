@@ -343,7 +343,7 @@ describe("/api/users", () => {
     });
   });
 
-  describe("DELETE /:task_id", () => {
+  describe("DELETE /:taskId", () => {
     it("should return 401 when the user is not authorized", async () => {
       const response = await api.delete(`/api/tasks/1`);
 
@@ -360,7 +360,22 @@ describe("/api/users", () => {
       expect(response.status).toBe(404);
     });
 
-    it("should retun 204 and delete the task from the DB", async () => {
+    it("should return 404 if a user wants to delete other user's task", async () => {
+      Task.collection.insert(tasks);
+
+      const tasksFromDbStart = await api
+        .get("/api/tasks")
+        .set("x-auth-token", token1);
+
+      // use the ID to delete the task with other users token
+      const response = await api
+        .delete(`/api/tasks/${tasksFromDbStart.body[0]._id}`)
+        .set("x-auth-token", token2);
+
+      expect(response.status).toBe(404);
+    });
+
+    it("should return 204 and delete the task from the DB", async () => {
       Task.collection.insert(tasks);
 
       const tasksFromDbStart = await api
@@ -379,20 +394,62 @@ describe("/api/users", () => {
       expect(response.status).toBe(204);
       expect(tasksFromDbEnd.body.length).toBe(tasksFromDbStart.body.length - 1);
     });
+  });
 
-    it("should return 404 if a user wants to delete other user's task", async () => {
+  describe("PUT /:taskId", () => {
+    it("should return 401 if the user is not authorized", async () => {
+      const response = await api.put("/api/tasks/1");
+
+      expect(response.status).toBe(401);
+    });
+
+    it("should return 404 if the task is not found or the task ID is not valid", async () => {
+      const response = await api
+        .put("/api/tasks/1")
+        .set("x-auth-token", token1);
+
+      expect(response.status).toBe(404);
+    });
+
+    it("should return 404 if a user wants to update other user's task", async () => {
       Task.collection.insert(tasks);
 
       const tasksFromDbStart = await api
         .get("/api/tasks")
         .set("x-auth-token", token1);
 
+      const task1 = tasksFromDbStart.body[0];
+      task1.title = "updated";
+      task1.days[0].duration = 10;
+
       // use the ID to delete the task with other users token
       const response = await api
         .delete(`/api/tasks/${tasksFromDbStart.body[0]._id}`)
-        .set("x-auth-token", token2);
+        .set("x-auth-token", token2)
+        .send(task1);
 
       expect(response.status).toBe(404);
+    });
+
+    it("should return 204 and the updated task", async () => {
+      Task.collection.insert(tasks);
+
+      const tasksFromDbStart = await api
+        .get("/api/tasks")
+        .set("x-auth-token", token1);
+
+      const task1 = tasksFromDbStart.body[0];
+      task1.title = "updated";
+      task1.days[0].duration = 10;
+
+      const response = await api
+        .put(`/api/tasks/${task1._id}`)
+        .set("x-auth-token", token1)
+        .send(task1);
+
+      expect(response.status).toBe(201);
+      expect(response.body.title).toMatch("updated");
+      expect(response.body.days[0].duration).toBe(10);
     });
   });
 });

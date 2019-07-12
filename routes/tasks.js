@@ -110,6 +110,47 @@ router.get("/month/:number", auth, async (req, res) => {
 });
 
 /*
+ * __TESTED
+ * __DELETE :     /api/tasks/:taskId
+ * __DESC   :     delete a task
+ * __AUTH   :     required
+ */
+router.delete("/:taskId", auth, async (req, res) => {
+  if (!ObjectId.isValid(req.params.taskId))
+    return res.status(404).send("task not found");
+
+  const result = await Task.findOneAndDelete({
+    _id: ObjectId(req.params.taskId),
+    userId: ObjectId(req.user.id)
+  });
+
+  if (!result || result.length === 0)
+    return res.status(404).send("task not found");
+
+  res.status(204).send(result);
+});
+
+/*
+ * update a task
+ */
+router.put("/:taskId", auth, async (req, res) => {
+  if (!ObjectId.isValid(req.params.taskId))
+    return res.status(404).send("task not found");
+
+  const task = await Task.findOneAndUpdate(
+    { _id: req.params.taskId },
+    {
+      $set: { title: req.body.title, days: req.body.days }
+    },
+    { new: true }
+  );
+
+  if (!task || task.length === 0) return req.send(404).send("task not found");
+
+  res.status(201).json(task);
+});
+
+/*
  * get tasks based on the user
  */
 // router.get("/", auth, async (req, res) => {
@@ -120,36 +161,5 @@ router.get("/month/:number", auth, async (req, res) => {
 //     .select(["title", "days", "weekInYear", "month", "user_id"]);
 //   res.send(tasks);
 // });
-
-/*
- * delete a task
- */
-router.delete("/:taskId", auth, async (req, res) => {
-  if (!ObjectId.isValid(req.params.taskId))
-    return res.status(404).send("task not found");
-    
-  const result = await Task.findOneAndDelete({
-    _id: ObjectId(req.params.taskId),
-    userId: ObjectId(req.user.id)
-  });
-
-  if (!result || result.length === 0)
-    return res.status(404).send("task not found");
-  res.status(204).send(result);
-});
-
-/*
- * update a task
- */
-router.put("/update/:task_id", async (req, res) => {
-  const task = await Task.findOneAndUpdate(
-    { _id: req.params.task_id },
-    {
-      $set: { title: req.body.title, days: req.body.days }
-    },
-    { new: true }
-  );
-  res.send(task);
-});
 
 module.exports = router;
