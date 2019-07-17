@@ -1,8 +1,7 @@
+const mongoose = require("mongoose");
+const { check } = require("express-validator");
 const config = require("config");
 const jwt = require("jsonwebtoken");
-const Joi = require("joi");
-const mongoose = require("mongoose");
-const passwordValidator = require("password-validator");
 
 // Define the user Schema
 const userSchema = new mongoose.Schema({
@@ -22,77 +21,53 @@ const userSchema = new mongoose.Schema({
     maxlength: 1024,
     unique: true
   },
-  added_date: { type: Date, default: Date.now }
+  avatar: { type: String },
+  date: { type: Date, default: Date.now }
 });
 
 userSchema.methods.generateAuthToken = function() {
-  return jwt.sign({ _id: this._id, first_name: this.first_name, last_name: this.last_name, added_date: this.added_date, email: this.email }, config.get("jwtPrivateKey"));
-}
-/* ************** 
-// schema for Joi
-************** */
-const schema = {
-  first_name: Joi.string()
-    .min(4)
-    .max(255)
-    .required(),
-  last_name: Joi.string()
-    .min(4)
-    .max(255)
-    .required(),
-  email: Joi.string()
-    .min(6)
-    .max(255)
-    .required()
-    .email(),
-  password: Joi.string()
-    .min(6)
-    .max(255)
-    .required(),
-  added_date: Joi.date(),
+  return jwt.sign(
+    {
+      id: this.id
+    },
+    config.get("jwtPrivateKey"),
+    { expiresIn: 3600 * 12 }
+  );
 };
 
-/* ************** ******
-// user validator by Joi
-* *********************/
-function validateUser(user, schema) {
-  return Joi.validate(user, schema);
-}
-
-// // validate only one property
-// function validateOneProperty(user) {
-
-// }
-
-// Password complexity
-function validatePasswordComplexity(pass) {
-  var passwordSchema = new passwordValidator();
-  passwordSchema
-    .is()
-    .min(6) // Minimum length 8
-    .is()
-    .max(255) // Maximum length 100
-    .has()
-    .uppercase() // Must have uppercase letters
-    .has()
-    .lowercase() // Must have lowercase letters
-    .has()
-    .digits() // Must have digits
-    .has()
-    .symbols() // Must have symbols
-    .has()
+/*
+ * user validator
+ */
+const validateUser = [
+  check("first_name", "Firstname is required")
     .not()
-    .spaces() // Should not have spaces
-    .is()
+    .isEmpty(),
+  check(
+    "first_name",
+    "Firstname must be between 4 and 255 characters"
+  ).isLength({ min: 4, max: 255 }),
+  check("last_name", "Lasttname is required")
     .not()
-    .oneOf(["Passw0rd", "Password123"]); // Blacklist these values
-  return passwordSchema.validate(pass, { list: true });
-}
+    .isEmpty(),
+  check("last_name", "Lastname must be between 4 and 255 characters").isLength({
+    min: 4,
+    max: 255
+  }),
+  check("email", "Please include a valide email").isEmail(),
+  check(
+    "password",
+    "Please enter a password with 6 or more character"
+  ).isLength({ min: 6 })
+];
+
+const userAuthenticationValidator = [
+  check("email", "Please include a valide email").isEmail(),
+  check("password", "Password is required").exists()
+];
 
 // User model
 const User = mongoose.model("User", userSchema);
 
 exports.User = User;
-exports.joiSchema = schema;
 exports.validateUser = validateUser;
-exports.validatePasswordComplexity = validatePasswordComplexity;
+exports.userAuthenticationValidator = userAuthenticationValidator;
