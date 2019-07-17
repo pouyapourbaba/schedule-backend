@@ -3,7 +3,7 @@ const ObjectId = mongoose.Types.ObjectId;
 const express = require("express");
 const router = express.Router();
 const _ = require("lodash");
-const { Task, validateTask } = require("../models/Task");
+const { Task, validateTask } = require("../models/task");
 const auth = require("../middleware/auth");
 
 /*
