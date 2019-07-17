@@ -1,4 +1,4 @@
 {
     "jwtPrivateKey": "",
-    "db": ""
+    "db": "mongodb://localhost/scheduler"
 }
