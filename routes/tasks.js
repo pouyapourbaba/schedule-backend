@@ -15,7 +15,7 @@ const auth = require("../middleware/auth");
 router.get("/", auth, async (req, res) => {
   try {
     const tasks = await Task.find({ userId: ObjectId(req.user.id) });
-    if (tasks.length === 0) return res.status(404).send("no tasks found");
+    // if (tasks.length === 0) return res.status(404).send("no tasks found");
     res.json(tasks);
   } catch (error) {}
 });
@@ -42,7 +42,7 @@ router.post("/", auth, async (req, res) => {
 });
 
 /*
- * __TESTED
+ * __TESTED @ new tests needed
  * __GET    :     /api/tasks/sum-weeks
  * __DESC   :     aggregate based on the week and sum up the total duration
  * __AUTH   :     required
@@ -53,12 +53,19 @@ router.get("/sum-weeks", auth, async (req, res) => {
     { $unwind: "$days" },
     { $group: { _id: "$week", total: { $sum: "$days.duration" } } }
   ]);
-  if (tasks.length === 0) return res.status(404).send("no tasks were found");
-  res.json(tasks);
+
+  let weeks = [];
+  for (let i = 0; i < 52; i++) {
+    weeks[i] = { _id: i + 1 };
+    const found = tasks.find(week => week._id === i + 1);
+    weeks[i].total = found ? found.total : 0;
+  }
+  // if (tasks.length === 0) return res.status(404).send("no tasks were found");
+  res.json(weeks);
 });
 
 /*
- * __TESTED
+ * __TESTED @ new tests needed
  * __GET    :     /api/tasks/sum-weeks
  * __DESC   :     aggregate based on the month and sum up the total duration
  * __AUTH   :     required
@@ -69,8 +76,29 @@ router.get("/sum-months", auth, async (req, res) => {
     { $unwind: "$days" },
     { $group: { _id: "$month", total: { $sum: "$days.duration" } } }
   ]);
-  if (tasks.length === 0) res.status(404).send("no tasks were found");
-  res.send(tasks);
+
+  let months = [
+    { name: "Jan", _id: 1 },
+    { name: "Feb", _id: 2 },
+    { name: "Mar", _id: 3 },
+    { name: "Apr", _id: 4 },
+    { name: "May", _id: 5 },
+    { name: "Jun", _id: 6 },
+    { name: "Jul", _id: 7 },
+    { name: "Aug", _id: 8 },
+    { name: "Sep", _id: 9 },
+    { name: "Oct", _id: 10 },
+    { name: "Nov", _id: 11 },
+    { name: "Dec", _id: 12 }
+  ];
+
+  months.map(d => {
+    const found = tasks.find(month => month._id === d._id);
+    found ? (d.total = found.total) : (d.total = 0);
+  });
+
+  // if (tasks.length === 0) res.status(404).send("no tasks were found");
+  res.send(months);
 });
 
 /*
@@ -87,7 +115,7 @@ router.get("/week/:number", auth, async (req, res) => {
     // .populate("userId")
     .select(["title", "days", "userId"]);
 
-  if (tasks.length === 0) return res.status(404).send("no tasks found");
+  // if (tasks.length === 0) return res.status(404).send([]);
   res.json(tasks);
 });
 

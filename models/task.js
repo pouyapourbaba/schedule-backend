@@ -25,7 +25,7 @@ const daySchema = new mongoose.Schema({
 const Days = mongoose.model("Day", daySchema);
 // Define the task schema
 const taskSchema = new mongoose.Schema({
-  title: { type: String, required: true, minlength: 2, maxlength: 255 },
+  title: { type: String, required: true, minlength: 1, maxlength: 255 },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -40,7 +40,7 @@ const taskSchema = new mongoose.Schema({
 function validateTask(task) {
   const schema = {
     title: Joi.string()
-      .min(2)
+      .min(1)
       .max(512)
       .required(),
     // userId: Joi.required(),
