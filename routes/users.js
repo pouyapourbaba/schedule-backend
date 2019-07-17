@@ -3,7 +3,7 @@ const router = express.Router();
 const gravatar = require("gravatar");
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
-const { User, validateUser } = require("../models/User");
+const { User, validateUser } = require("../models/user");
 const { validationResult } = require("express-validator");
 
 // @route   POST api/users

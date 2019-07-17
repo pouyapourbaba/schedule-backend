@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const config = require("config");
 const mongoose = require("mongoose");
 const { Task } = require("../../models/Task");
-const { User } = require("../../models/User");
+const { User } = require("../../models/user");
 const { aggregate } = require("../testHelpers");
 let server;
 let api;
