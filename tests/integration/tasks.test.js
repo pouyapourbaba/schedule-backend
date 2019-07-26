@@ -148,7 +148,7 @@ describe("/api/users", () => {
   describe("GET /", () => {
     it("should return 401 if the client is not logged in", async () => {
       const response = await api.get("/api/tasks");
-      expect(response.status).toBe(401+"bug");
+      expect(response.status).toBe(401);
     });
 
     it("should return all tasks related to the user", async () => {
