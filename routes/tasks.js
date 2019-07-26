@@ -15,6 +15,7 @@ const auth = require("../middleware/auth");
 router.get("/", auth, async (req, res) => {
   try {
     const tasks = await Task.find({ userId: ObjectId(req.user.id) });
+
     // if (tasks.length === 0) return res.status(404).send("no tasks found");
     res.json(tasks);
   } catch (error) {}
@@ -42,7 +43,7 @@ router.post("/", auth, async (req, res) => {
 });
 
 /*
- * __TESTED @ new tests needed
+ * __TESTED 
  * __GET    :     /api/tasks/sum-weeks
  * __DESC   :     aggregate based on the week and sum up the total duration
  * __AUTH   :     required
@@ -60,12 +61,13 @@ router.get("/sum-weeks", auth, async (req, res) => {
     const found = tasks.find(week => week._id === i + 1);
     weeks[i].total = found ? found.total : 0;
   }
+
   // if (tasks.length === 0) return res.status(404).send("no tasks were found");
   res.json(weeks);
 });
 
 /*
- * __TESTED @ new tests needed
+ * __TESTED 
  * __GET    :     /api/tasks/sum-weeks
  * __DESC   :     aggregate based on the month and sum up the total duration
  * __AUTH   :     required
