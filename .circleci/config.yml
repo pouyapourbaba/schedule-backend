@@ -10,7 +10,7 @@ jobs:
       - image: circleci/node:10.16.0
         environment: 
           scheduler_jwtPrivateKey: myPrivateKey
-      - image: circleci/mongo
+      # - image: circleci/mongo
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
