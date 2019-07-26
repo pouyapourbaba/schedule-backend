@@ -1,6 +1,6 @@
 const auth = require("../middleware/auth");
 const _ = require("lodash");
-const { Todo, validateTodo } = require("../models/Todo");
+const { Todo, validateTodo } = require("../models/todo");
 const express = require("express");
 const router = express.Router();
 
