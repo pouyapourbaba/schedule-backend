@@ -163,10 +163,11 @@ describe("/api/users", () => {
       expect(response.body[0].userId.toString()).toEqual(userId1.toString());
     });
 
-    it("should return 404 if no tasks are found for that user", async () => {
+    it("should return an empty array if no tasks are found for that user", async () => {
       const response = await api.get(`/api/tasks`).set("x-auth-token", token1);
+      console.log("empty response", response.body);
 
-      expect(response.status).toBe(404);
+      expect(response.body).toEqual([]);
     });
   });
 
@@ -241,16 +242,23 @@ describe("/api/users", () => {
         .set("x-auth-token", token1);
 
       expect(response.status).toBe(200);
-      expect(response.body[0].total).toBe(aggregate(tasks, userId1, "week", 2));
-      expect(response.body[1].total).toBe(aggregate(tasks, userId1, "week", 1));
+      expect(response.body[0].total).toBe(aggregate(tasks, userId1, "week", 1));
+      expect(response.body[1].total).toBe(aggregate(tasks, userId1, "week", 2));
     });
 
-    it("should return 404 if no tasks were found", async () => {
+    it("should return an array of week objects for the whole year with total values of zero, if no tasks were found", async () => {
       const response = await api
         .get("/api/tasks/sum-weeks")
         .set("x-auth-token", token1);
 
-      expect(response.status).toBe(404);
+      const totalYearlyHours = response.body.reduce(
+        (a, b) => {
+          return { total: a.total + b.total };
+        },
+        { total: 0 }
+      );
+
+      expect(totalYearlyHours.total).toBe(0);
     });
   });
 
@@ -269,19 +277,23 @@ describe("/api/users", () => {
 
       expect(response.status).toBe(200);
       expect(response.body[0].total).toBe(
-        aggregate(tasks, userId1, "month", 2)
+        aggregate(tasks, userId1, "month", 1)
       );
       expect(response.body[1].total).toBe(
-        aggregate(tasks, userId1, "month", 1)
+        aggregate(tasks, userId1, "month", 2)
       );
     });
 
-    it("should return 404 if no tasks were found", async () => {
+    it("should return an array of the month object with total hours of zero, if no tasks were found", async () => {
       const response = await api
         .get("/api/tasks/sum-months")
         .set("x-auth-token", token1);
 
-      expect(response.status).toBe(404);
+      const yearlyTotalHours = response.body.reduce((a,b) => {
+        return {total: a.total + b.total}
+      }, {total: 0})
+
+      expect(yearlyTotalHours.total).toBe(0);
     });
   });
 
@@ -292,12 +304,12 @@ describe("/api/users", () => {
       expect(response.status).toBe(401);
     });
 
-    it("should return 404 if there is no task for that week", async () => {
+    it("should return an empty array, if there is no task for that week", async () => {
       const response = await api
         .get("/api/tasks/week/65654")
         .set("x-auth-token", token1);
 
-      expect(response.status).toBe(404);
+      expect(response.body).toEqual([]);
     });
 
     it("should return the tasks for the week", async () => {
