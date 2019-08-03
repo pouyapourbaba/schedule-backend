@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "cross-env NODE_ENV=test jest --watchAll --verbose --runInBand --detectOpenHandles",
+    "test": "cross-env NODE_ENV=test jest --verbose",
     "env": "cross-env NODE_ENV=test node index.js"
   },
   "engines": {
