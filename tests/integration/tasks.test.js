@@ -137,8 +137,8 @@ describe("/API/USERS *****************************************", () => {
 
     // Close the server and cleanup the DB
     afterEach(async () => {
-        await server.close();
         await Task.remove({});
+        await server.close();
     });
 
     afterAll(async () => {
@@ -166,7 +166,6 @@ describe("/API/USERS *****************************************", () => {
 
         it("should return an empty array if no tasks are found for that user", async () => {
             const response = await api.get(`/api/tasks`).set("x-auth-token", token1);
-            console.log("empty response", response.body);
 
             expect(response.body).toEqual([]);
         });
