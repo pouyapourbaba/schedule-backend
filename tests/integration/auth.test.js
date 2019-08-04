@@ -8,8 +8,8 @@ let api;
 let userId1;
 
 describe("API/AUTH *****************************************", () => {
-    // run the server
-    beforeAll(async () => {
+
+    beforeEach(async () => {
         server = require("../../index");
         api = request(server);
 
@@ -27,22 +27,15 @@ describe("API/AUTH *****************************************", () => {
         const decodedUser1 = await jwt.decode(token1, config.get("jwtPrivateKey"));
 
         userId1 = decodedUser1.id;
-
-        await server.close();
-    });
-
-    beforeEach(async () => {
-        server = require("../../index");
-        api = request(server);
     });
 
     // Close the server and cleanup the DB
     afterEach(async () => {
+        await User.remove({});
         await server.close();
     });
 
     afterAll(async () => {
-        await User.remove({});
         mongoose.connection.close();
     });
 
@@ -94,7 +87,7 @@ describe("API/AUTH *****************************************", () => {
             const decodedUser = await jwt.decode(response.body.token, config.get("jwtPrivateKey"));
 
             expect(response.status).toBe(200);
-            expect(response.body.token).toBeTruthy();
+            expect(response.body).toHaveProperty("token");
             expect(decodedUser.id).toBe(userId1)
         });
     });

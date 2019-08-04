@@ -15,8 +15,8 @@ let tasks;
 let task;
 
 describe("/API/USERS *****************************************", () => {
-    // run the server
-    beforeAll(async () => {
+
+    beforeEach(async () => {
         server = require("../../index");
         api = request(server);
 
@@ -44,13 +44,6 @@ describe("/API/USERS *****************************************", () => {
 
         userId1 = mongoose.Types.ObjectId(decodedUser1.id);
         userId2 = mongoose.Types.ObjectId(decodedUser2.id);
-
-        await server.close();
-    });
-
-    beforeEach(async () => {
-        server = require("../../index");
-        api = request(server);
 
         tasks = [
             {
@@ -138,11 +131,11 @@ describe("/API/USERS *****************************************", () => {
     // Close the server and cleanup the DB
     afterEach(async () => {
         await Task.remove({});
+        await User.remove({});
         await server.close();
     });
 
     afterAll(async () => {
-        await User.remove({});
         mongoose.connection.close();
     });
 
