@@ -6,7 +6,7 @@ const _ = require("lodash");
 const { User, validateUser } = require("../models/user");
 const { validationResult } = require("express-validator");
 
-// @route   POST api/users
+// @route   POST api/users 
 // @desc    Register user
 // @access  Public
 router.post("/", validateUser, async (req, res) => {
