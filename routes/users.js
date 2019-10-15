@@ -15,7 +15,8 @@ router.post("/", validateUser, async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { first_name, last_name, email, password } = req.body;
+  let { first_name, last_name, email, password } = req.body;
+  email = email.toLowerCase();
 
   // check to see if the user with the entered email already exists
   let user = await User.findOne({ email });
