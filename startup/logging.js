@@ -1,6 +1,6 @@
 const winston = require("winston");
 // require("winston-mongodb");
-require("express-async-errors");
+// require("express-async-errors");
 
 module.exports.mainLogger = function() {
   // handle uncaught exceptions and exit the process
