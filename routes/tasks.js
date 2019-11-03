@@ -17,7 +17,7 @@ router.get('/', auth, async (req, res) => {
     const tasks = await Task.find({ userId: ObjectId(req.user.id) });
     res.json(tasks);
   } catch (error) {
-    console.error(error.message)
+    console.error(error.message);
   }
 });
 
