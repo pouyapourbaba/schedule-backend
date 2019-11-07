@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const config = require('./config');
+console.log(config.jwtPrivateKey);
 
 // set the route handlers
 require('./startup/routes')(app);
