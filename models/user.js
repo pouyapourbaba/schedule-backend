@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
-const { check } = require("express-validator");
-const config = require("config");
-const jwt = require("jsonwebtoken");
+const mongoose = require('mongoose');
+const { check } = require('express-validator');
+const config = require('../config');
+const jwt = require('jsonwebtoken');
 
 // Define the user Schema
 const userSchema = new mongoose.Schema({
@@ -30,7 +30,7 @@ userSchema.methods.generateAuthToken = function() {
     {
       id: this.id
     },
-    config.get("jwtPrivateKey"),
+    config.jwtPrivateKey,
     { expiresIn: 3600 * 12 }
   );
 };
@@ -39,34 +39,34 @@ userSchema.methods.generateAuthToken = function() {
  * user validator
  */
 const validateUser = [
-  check("first_name", "Firstname is required")
+  check('first_name', 'Firstname is required')
     .not()
     .isEmpty(),
   check(
-    "first_name",
-    "Firstname must be between 4 and 255 characters"
+    'first_name',
+    'Firstname must be between 4 and 255 characters'
   ).isLength({ min: 4, max: 255 }),
-  check("last_name", "Lasttname is required")
+  check('last_name', 'Lasttname is required')
     .not()
     .isEmpty(),
-  check("last_name", "Lastname must be between 4 and 255 characters").isLength({
+  check('last_name', 'Lastname must be between 4 and 255 characters').isLength({
     min: 4,
     max: 255
   }),
-  check("email", "Please include a valide email").isEmail(),
+  check('email', 'Please include a valide email').isEmail(),
   check(
-    "password",
-    "Please enter a password with 6 or more character"
+    'password',
+    'Please enter a password with 6 or more character'
   ).isLength({ min: 6 })
 ];
 
 const userAuthenticationValidator = [
-  check("email", "Please include a valide email").isEmail(),
-  check("password", "Password is required").exists()
+  check('email', 'Please include a valide email').isEmail(),
+  check('password', 'Password is required').exists()
 ];
 
 // User model
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 
 exports.User = User;
 exports.validateUser = validateUser;
